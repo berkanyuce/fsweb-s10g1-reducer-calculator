@@ -1,15 +1,17 @@
-import { ADD_ONE, APPLY_NUMBER, CHANGE_OPERATION } from './../actions';
+import { ADD_ONE, APPLY_NUMBER, CHANGE_OPERATION, CLEAR, MEMORY_CLEAR, MEMORY_PLUS, MEMORY_RECALL, DIGIT, CALCULATE, applyNumber } from './../actions';
 
 export const initialState = {
   total: 100,
   operation: "*",
-  memory: 100
+  memory: 100,
+  screen: "",
+  temp: 0
 }
 
 const calculateResult = (num1, num2, operation) => {
   switch (operation) {
     case ("+"):
-      return num1 + num2;
+      return Number(num1) + Number(num2);
     case ("*"):
       return num1 * num2;
     case ("-"):
@@ -17,6 +19,10 @@ const calculateResult = (num1, num2, operation) => {
     default:
       return;
   }
+}
+
+const typeDigit = (screen, numKey) => {
+  return `${screen}${numKey}`
 }
 
 const reducer = (state, action) => {
@@ -36,8 +42,52 @@ const reducer = (state, action) => {
     case (CHANGE_OPERATION):
       return ({
         ...state,
-        operation: action.payload
+        operation: action.payload,
+        temp: state.screen,
+        screen: ""
       });
+
+    case (CLEAR):
+      return({
+        ...state,
+        total: 0,
+        screen: 0,
+        temp: 0
+      })
+
+    case (MEMORY_CLEAR):
+      return({
+        ...state,
+        memory: 0
+      })
+
+    case (MEMORY_RECALL):
+      return({
+        ...state,
+        screen: calculateResult(state.screen, state.memory, state.operation),
+        total: calculateResult(state.screen, state.memory, state.operation),
+      })
+
+    case (MEMORY_PLUS):
+      return({
+        ...state,
+        memory: state.total
+      })
+
+    case (DIGIT):
+      return({
+        ...state,
+        screen: typeDigit(state.screen, action.payload)
+      })
+
+    case (CALCULATE):
+      const calculation = calculateResult(state.screen, state.temp, state.operation)
+      return({
+        ...state,
+        total: calculation,
+        screen: calculation,
+        temp: 0
+      })
 
     default:
       return state;
